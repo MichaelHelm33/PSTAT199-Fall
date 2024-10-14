@@ -1,0 +1,203 @@
+---
+title: "Quarto Notes"
+subtitle: "Learning Quarto"
+abstract: "Here we will be going through tutorials/workshops of Quarto"
+author: "Michael Helm"
+date: "2024-10-09"
+date-modified: "2024-10-09"
+crossref:
+  lof-title: "List of Figures"
+format:
+  html:
+    default-image-extension: svg
+    self-contained: true
+    code-fold: true                   #allows for tab to hide code
+    code-copy: true                 #code copy button
+    code-annotations: true            #enables code annotations
+    code-link: true
+    toc: true                         #creates a table of contents
+    toc-depth: 3                      #specifiec depth of toc
+    toc-location: body                #where toc should be located
+    top-title: 'Table of Contents'    #TOC title
+    smooth-scroll: true               #smooth scroll
+    toc-expand: true                  #expanding menu
+    monobackgroundcolor: 'lightgrey'  #color of background of code output
+    backgroundcolor: 'lightblue'      #background color 
+    fontcolor: 'black'                #font color
+    linkcolor: 'purple'               #color of links
+    title-block-banner: true          #creates a title banner
+    crossrefs-hover: true
+    reference-location: margin        #puts references in margin
+    citation-location: margin         # citations go into margins
+    embed-resources: true
+    code-tools: true
+---  
+---
+
+# Questions
+
+1. When would we use Yaml commands like:
+
+-   toi
+
+-   page-layout
+
+-   notebook-view
+
+2. How do I get the photos to load in correctly? [Uneven Columns Section](#uneven-columns)
+
+3. When you render a quarto document, how does it work, it just updates the same file?
+
+4. Does ::: denote options in quarto?
+
+5. 
+
+
+
+# Quarto
+
+-   Similar to R-Markdown but more to it. Has more accessible defaults and supports better accessibility
+
+-   Different YAML will create 3 different outputs.
+
+    -   Document
+
+        -   title**:** "Lesson 1" format**:** html
+
+    -   Presentation
+
+        -   title**:** "Lesson 1" format**:** revealjs
+
+    -   Website
+
+        -   project**:** type**:** website
+
+            website**:** navbar**:** left**:** **-** lesson-1.qmd
+
+## Air Quality
+
+@fig-airquality further explores the impact of temperature on ozone level.
+
+- To create the link above we used `@name` as well as these options within the R chunk
+  - #| label: fig-airquality
+  - #| fig-cap: Temperature and ozone level.
+  - #| warning: false
+
+```{r}
+#| label: fig-airquality
+#| fig-cap: Temperature and ozone level.
+#| warning: false
+
+library(ggplot2)
+ggplot(airquality, 
+       mapping = aes(x = Temp, y = Ozone)
+       ) + 
+
+  geom_point() + 
+  geom_smooth(method = "loess"
+)
+
+```
+
+```{r}
+#| label: penguin-species
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(palmerpenguins) 
+library(quarto)
+
+penguins |>
+  distinct(species)
+```
+
+## Text formatting
+
+-   *italics*, single star \* before/after
+-   **bold**, double star \*\* before/after
+-   superscript^2^ , base then \^ before/after exponent
+-   subscript~2~, base then \~ before/after subscript
+-   ~~strikethrough~~, double tilda \~\~ before/after
+-   `verbatim code`, code in r ''
+
+## Quarto Commands
+
+### Uneven Columns
+
+::: {.columns}
+::: {.column width=25%}
+**Column 1**
+
++ item 1
++ item 2
+
+::: 
+::: {.column width=75%}
+**Column 2**
+
+![Practice Photo](~/UCSB College/PSTAT 122/Screenshots/Exercise 2.8.png){.lightbox}
+:::
+:::
+
+
+## Callouts
+::: {.callout-note collapse="true"}
+
+- There are five types of callouts: note, tip, warning, caution, and important.
+- You can add headers to callouts same way you would normally would
+- {.callout-note collapse="true"} makes them collapsible 
+
+:::
+
+
+:::  callout-tip
+Here you go
+:::
+
+::: callout-caution
+caution!!
+:::
+
+::: callout-warning
+oh noooo
+:::
+
+::: callout-important
+make sure you see this
+:::
+
+
+## Creating Tabs
+
+::: panel-tabset
+
+### Tab 1
+
+This is Tab 1 using ::: panel-tabset
+
+###  Tab 2
+
+This is Tab 2
+:::
+
+## Footnote Reference
+
+Here is a footnote[^1]
+
+[^1]: Here is one way to footnote
+
+and another^[Here is the other footnote.]
+
+
+## In the Margins
+
+Use `#| column: margin and output/code will be in margin like below
+
+```{r}
+#| column: margin
+
+mtcars[1:6, 1:3]
+```
+
+
