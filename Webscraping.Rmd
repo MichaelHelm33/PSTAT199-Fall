@@ -1,0 +1,355 @@
+---
+title: "Webscraping"
+author: "Michael Helm"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+## Introduction 
+
+- Basics of webscraping with rvest. 
+- Web scraping is used to extract data from webpages. Some websites will offer API, a set of structureed HTTP requests that return data as JSON.
+
+## Ethics and Legalities
+
+- If the data is public, non-personal and factual, it is likely okay.
+- A good practice is to wait a little between each scraping request between pages. One easy way to do so is to use the `polite` package
+- Many website contain a "terms and conditions" or "terms of service" if you read that closely it most likely will specify 
+- Be sure not to scrape personal identifuiable information like names, email addresses, phone numbers, dates of birth, etc. 
+- Copyright, data is not under copyright protection as long it is apps
+
+## HTML Basics
+
+- HTML HyperText Markup Language
+- Hierachical structure by elements that start with a tag `<tag>`, optional attributes `id = 'first'` and an end tag like `</tag>` and contents everything between the start and end taG
+
+```{r eval = FALSE}
+<html>
+<head>
+  <title>Page title</title>
+</head>
+<body>
+  <h1 id='first'>A heading</h1>
+  <p>Some text &amp; <b>some bold text.</b></p>
+  <img src='myimg.png' width='100' height='100'>
+</body>
+```
+
+- Since < and > are used for tags, you have to use escapes sucks as `&gt` (greater than) and `&lt` (less than)
+
+**Elements**
+
+- Every pafe must be in an `<html>` element and have two children `<head>` and `<body>`
+- `<body>` contains the informaiton you see in the browser
+- There is also block tags `<h1>` (heading 1), `<section>` (section), `<p>` (paragraph) and `<ol>` (ordered lists), `<li>` (list item), `<ul>` (unordered lists)
+- incline tags like `<b>` (bold), `<i>` (italics) and `<a>`
+
+Here is an example that shows a paragraph which a single word in bold
+
+```{r eval = FALSE}
+<p>
+  Hi! My <b>name</b> is Hadley.
+</p>
+```
+
+
+## Extracting Data
+
+1. you will need the URL of the page you what to scrape
+2. read in the html into r with `read_html()`. This returns and `xml_document()`
+
+```{r}
+library(tidyverse)
+library(rvest)
+
+html <- read_html("http://rvest.tidyverse.org/")
+html
+```
+
+Withing rvest there is a function that lets you write HTML inline. Here is an example:
+```{r}
+html <- minimal_html("
+  <p>This is a paragraph</p>
+  <ul>
+    <li>This is a bulleted list</li>
+  </ul>
+")
+html
+```
+
+
+- CSS is short for cascading style sheets, a tool for defining the visual styling. 
+
+- There is a miniature language for selecting elements on a page called CSS selectors. 
+
+- CSS selectors find patterns for locating html elements. 
+  - `p` selects all `<p>` elements 
+  - `.title` selects all emelents with class "title"
+  - `#title` selects the elemnt with the `id` attribute = "title"
+  
+Here is a simple example
+
+```{r}
+html <- minimal_html("
+  <h1>This is a heading</h1>
+  <p id='first'>This is a paragraph</p>
+  <p class='important'>This is an important paragraph</p>
+")
+```
+
+Using `html_elements()`
+
+```{r}
+html |> html_elements("p")
+
+html |> html_elements(".important")
+
+html |> html_elements("#first")
+```
+There is also `html_elements()` that has the same number of inputs and outputs
+
+```{r}
+html |> html_element("p")
+```
+
+The difference between the `html_element()` and `html_elements()` is that when you use a selector than returns no elements, `element` will return missing value and `elements` will have a vector of 0 length
+
+### Nesting Selections 
+
+In most cases, you’ll use `html_elements()` and `html_element()` together, typically using `html_elements()` to identify elements that will become observations then using `html_element()` to find elements that will become variables.
+
+Here is inofrmation on different star wars characters
+
+```{r}
+html <- minimal_html("
+  <ul>
+    <li><b>C-3PO</b> is a <i>droid</i> that weighs <span class='weight'>167 kg</span></li>
+    <li><b>R4-P17</b> is a <i>droid</i></li>
+    <li><b>R2-D2</b> is a <i>droid</i> that weighs <span class='weight'>96 kg</span></li>
+    <li><b>Yoda</b> weighs <span class='weight'>66 kg</span></li>
+  </ul>
+  ")
+```
+
+
+```{r}
+characters <- html |> html_elements("li")
+characters
+```
+
+To extract the name of each character, we use `html_element()`, because when applied to the output of `html_elements()` it’s guaranteed to return one response per element:
+
+```{r}
+characters |> html_element("b")
+```
+```{r}
+characters |> html_element(".weight")
+
+
+characters |> html_elements(".weight")
+
+```
+
+With the second output you see that we lose the connection between names and weights. 
+
+## Text and Attributes
+
+The function `html_text2()` etracts the plain text.
+
+```{r}
+characters |> 
+  html_element("b") |> 
+  html_text2()
+
+characters |> 
+  html_element(".weight") |> 
+  html_text2()
+```
+
+While the function `html_attr()` extracts data from attributes. It will always return a string, sp numbers and dates will need post processing.
+
+```{r}
+html <- minimal_html("
+  <p><a href='https://en.wikipedia.org/wiki/Cat'>cats</a></p>
+  <p><a href='https://en.wikipedia.org/wiki/Dog'>dogs</a></p>
+")
+
+html |> 
+  html_elements("p") |> 
+  html_element("a") |> 
+  html_attr("href")
+```
+
+### Tables
+
+- If we get lucky the data will be stored in an HTML table and we will just need to read it.
+- Table Elements
+  - `<table>` table
+  - `<tr>` table row
+  - `<th>` table heading
+  - `<td>` table data
+
+Here’s a simple HTML table with two columns and three rows:
+We will use the function `html_table()` to read in the table
+
+```{r}
+html <- minimal_html("
+  <table class='mytable'>
+    <tr><th>x</th>   <th>y</th></tr>
+    <tr><td>1.5</td> <td>2.7</td></tr>
+    <tr><td>4.9</td> <td>1.3</td></tr>
+    <tr><td>7.2</td> <td>8.1</td></tr>
+  </table>
+  ")
+
+html |> 
+  html_element(".mytable") |>  #idenifies table of choice aka name
+  html_table()
+```
+Above it was able to convert into numbers but this is not always the case. We can use `convert = FALSE` to negate this and then do post processing.
+
+
+### Questions
+
+Is class just naming the specific element?
+
+
+## Finding the right selectors
+
+- Selectgadget is a javascript bookmarklet that automatically generates CSS selectors based on the positibe and negative examples that you provide.
+- Chrome has the best web developer tools, right clock on an element on the page and click `inspect`.
+
+
+## Putting it all together 
+
+We will use the `vignette("starwars")`
+
+This will return the 7 moveis on the page, suggesting that using `section` was a good selector
+```{r}
+url <- "https://rvest.tidyverse.org/articles/starwars.html"
+html <- read_html(url)
+
+section <- html |> html_elements("section")
+section
+```
+
+```{r}
+
+# will find the titles
+section |> 
+  html_element("h2") |> 
+  html_text2()
+
+# name of directors
+section |>
+  html_element(".director") |> 
+  html_text2()
+
+```
+
+ Once we do that for each compnenet we wrap it in a tibble like:
+ 
+```{r}
+library(tidyverse)
+
+
+
+tibble(
+  title = section |> 
+    html_element("h2") |> 
+    html_text2(),
+  released = section |> 
+    html_element("p") |> 
+    html_text2() |> 
+    str_remove("Released: ") |> 
+    parse_date(),
+  director = section |> 
+    html_element(".director") |> 
+    html_text2()
+)
+```
+ 
+
+
+
+The next example we will use the top 250 movies 
+
+```{r, eval= FALSE}
+
+url <- "https://web.archive.org/web/20220201012049/https://www.imdb.com/chart/top/"
+
+html <- read_html(url)
+
+table <- html |> 
+  html_element("table") |> 
+  html_table()
+table
+```
+
+
+The table loaded in well but we need to rename columns to make them easier to work with.
+
+```{r eval= FALSE}
+ratings <- table |>
+  select(
+    rank_title_year = `Rank & Title`,
+    rating = `IMDb Rating`
+  ) |> 
+  mutate(
+    rank_title_year = str_replace_all(rank_title_year, "\n +", " ")
+  ) |> 
+  separate_wider_regex(
+    rank_title_year,
+    patterns = c(
+      rank = "\\d+", "\\. ",
+      title = ".+", " +\\(",
+      year = "\\d+", "\\)"
+    )
+  )
+ratings
+```
+
+
+
+```{r}
+html |> 
+  html_elements("td strong") |> 
+  head() |> 
+  html_attr("title")
+
+```
+
+```{r eval = FALSE}
+ratings |>
+  mutate(
+    rating_n = html |> html_elements("td strong") |> html_attr("title")
+  ) |> 
+  separate_wider_regex(
+    rating_n,
+    patterns = c(
+      "[0-9.]+ based on ",
+      number = "[0-9,]+",
+      " user ratings"
+    )
+  ) |> 
+  mutate(
+    number = parse_number(number)
+  )
+```
+
+
+
+Remember `html_elements()` returns what you see in the brower.
+
+
+Sometimes you'll hit a site where `html_elements()` and friends don't return anything you see in the browser. Many times this is due to it being written in javascript and rvest only reads im html. 
+
+
+#sidebar
+
+.title
+
+#main > section:nth-child(3)
+
+#main > p

@@ -1,0 +1,1759 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Webscraping practice</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Practicing Webscraping_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Practicing Webscraping_files/libs/quarto-html/quarto.js"></script>
+<script src="Practicing Webscraping_files/libs/quarto-html/popper.min.js"></script>
+<script src="Practicing Webscraping_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Practicing Webscraping_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Practicing Webscraping_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Practicing Webscraping_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Practicing Webscraping_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Practicing Webscraping_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Practicing Webscraping_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Webscraping practice</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="setting-up" class="level2">
+<h2 class="anchored" data-anchor-id="setting-up">Setting Up</h2>
+<div class="cell" data-warning="false" data-message="false">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'tidyverse' was built under R version 4.3.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'ggplot2' was built under R version 4.3.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'tidyr' was built under R version 4.3.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'dplyr' was built under R version 4.3.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.4
+✔ forcats   1.0.0     ✔ stringr   1.5.0
+✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rvest)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'rvest' was built under R version 4.3.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'rvest'
+
+The following object is masked from 'package:readr':
+
+    guess_encoding</code></pre>
+</div>
+</div>
+</section>
+<section id="url" class="level2">
+<h2 class="anchored" data-anchor-id="url">URL</h2>
+<p>Let’s load in the URL and see the different elements</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>url <span class="ot">&lt;-</span> <span class="st">"https://www.espn.com/nfl/team/stats/_/name/gb/green-bay-packers"</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>html <span class="ot">&lt;-</span><span class="fu">read_html</span>(url)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>section <span class="ot">&lt;-</span> html <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">"section"</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>section</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{xml_nodeset (5)}
+[1] &lt;section class="HeaderScoreboard HeaderScoreboard--empty" aria-label="Hea ...
+[2] &lt;section class="Card"&gt;&lt;div class="Wrapper Card__Content"&gt;\n&lt;div class="fl ...
+[3] &lt;section class="StatLeaders flex" aria-labelledby="a11yLeadersTitle"&gt;&lt;a h ...
+[4] &lt;section class="Card PageFooter"&gt;&lt;div class="Wrapper Card__Content PageFo ...
+[5] &lt;section class="LegalFooter LegalFooter--default" aria-label="Legal Foote ...</code></pre>
+</div>
+</div>
+<p>Since we see the elements of different sections we can deep further down into the section with class = “card”. We will index the second node.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>content <span class="ot">&lt;-</span> section[<span class="dv">2</span>] <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">".Wrapper.Card__Content"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="note">
+When class attribute is separated by spaces in this case class “Wrapper Card__Content” it means this
+<div>
+<p>has two classes “wrapper” and “card__content”/ We now have access to both and the whole page.</p>
+<p>:::</p>
+<p>Let’s now try and get the information of team leaders in various statistics like passing yards, rushing years, etc. First we grab the title of all statistics and as you see from the banner there is 5 different statistics on the banner.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>team_leaders <span class="ot">&lt;-</span> content <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">".ResponsiveWrapper"</span>) <span class="sc">%&gt;%</span>  <span class="fu">html_elements</span>(<span class="st">".StatLeaders"</span>) <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">".Athlete.db.flex-expand.Athlete__Link.clr-gray-01"</span>) </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>stat_names <span class="ot">&lt;-</span> team_leaders  <span class="sc">%&gt;%</span>  </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_elements</span>(<span class="st">"h2"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_text2</span>()</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>stat_names</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Passing Yards"   "Rushing Yards"   "Receiving Yards" "Tackles"        
+[5] "Interceptions"  </code></pre>
+</div>
+</div>
+<p>Now lets try and pull the name and statistic</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>name <span class="ot">&lt;-</span> team_leaders <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">".Athlete__PlayerWrapper.flex.justify-center.flex-column.flex-expand"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_elements</span>(<span class="st">".di.flex.items-baseline.n8"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_elements</span>(<span class="st">".Athlete__PlayerName"</span>) <span class="sc">%&gt;%</span> <span class="fu">html_text</span>()</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>position <span class="ot">&lt;-</span> team_leaders <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">".Athlete__PlayerWrapper.flex.justify-center.flex-column.flex-expand"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_elements</span>(<span class="st">".di.flex.items-baseline.n8"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_elements</span>(<span class="st">".Athlete__NameDetails.ml2.clr-gray-04.di.ns9"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_text2</span>()</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>statistic <span class="ot">&lt;-</span> team_leaders <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">".Athlete__PlayerWrapper.flex.justify-center.flex-column.flex-expand"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_elements</span>(<span class="st">".flex.items-center.justify-between"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_elements</span>(<span class="st">".clr-gray-01.pr3.hs2"</span>) <span class="sc">%&gt;%</span>   <span class="fu">html_text</span>()</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>name</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Jordan Love"     "Josh Jacobs"     "Jayden Reed"     "Quay Walker"    
+[5] "Xavier McKinney"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>position</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "QB" "RB" "WR" "LB" "S" </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>statistic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "1,547" "667"   "507"   "52"    "6"    </code></pre>
+</div>
+</div>
+<p>Now we have gotten the name, position, statistic and static name for the team leaders. Lets make a tibble.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>packer_leaders <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">Name=</span>name, <span class="at">Position =</span> position, <span class="at">Amount =</span> statistic, <span class="st">"Type"</span> <span class="ot">=</span> stat_names)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>packer_leaders</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 4
+  Name            Position Amount Type           
+  &lt;chr&gt;           &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt;          
+1 Jordan Love     QB       1,547  Passing Yards  
+2 Josh Jacobs     RB       667    Rushing Yards  
+3 Jayden Reed     WR       507    Receiving Yards
+4 Quay Walker     LB       52     Tackles        
+5 Xavier McKinney S        6      Interceptions  </code></pre>
+</div>
+</div>
+<p>Now we have a tibble of the 5 statistics leaders of the green bay packers.</p>
+<section id="tables" class="level2">
+<h2 class="anchored" data-anchor-id="tables">Tables</h2>
+<p>Let’s see if we can pull information from the tables. Here we are able to get the 8 tables the url offers. Team statistics</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>table_col1 <span class="ot">&lt;-</span> content <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">".ResponsiveTable.ResponsiveTable--fixed-left.mt5.remove_capitalize"</span>) <span class="sc">%&gt;%</span>  <span class="fu">html_elements</span>(<span class="st">".flex"</span>)  <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">".Table.Table--align-right.Table--fixed.Table--fixed-left"</span>)<span class="sc">%&gt;%</span> <span class="fu">html_table</span>()</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>table_col1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1]]
+# A tibble: 3 × 1
+  Name           
+  &lt;chr&gt;          
+1 Jordan Love QB 
+2 Malik Willis QB
+3 Total          
+
+[[2]]
+# A tibble: 11 × 1
+   Name               
+   &lt;chr&gt;              
+ 1 Josh Jacobs RB     
+ 2 Emanuel Wilson RB  
+ 3 Malik Willis QB    
+ 4 Jayden Reed WR     
+ 5 Chris Brooks RB    
+ 6 Bo Melton WR       
+ 7 Jordan Love QB     
+ 8 MarShawn Lloyd RB  
+ 9 Tucker Kraft TE    
+10 Christian Watson WR
+11 Total              
+
+[[3]]
+# A tibble: 14 × 1
+   Name               
+   &lt;chr&gt;              
+ 1 Jayden Reed WR     
+ 2 Romeo Doubs WR     
+ 3 Tucker Kraft TE    
+ 4 Christian Watson WR
+ 5 Dontayvion Wicks WR
+ 6 Josh Jacobs RB     
+ 7 Bo Melton WR       
+ 8 Emanuel Wilson RB  
+ 9 Ben Sims TE        
+10 Malik Heath WR     
+11 Luke Musgrave TE   
+12 MarShawn Lloyd RB  
+13 Chris Brooks RB    
+14 Total              
+
+[[4]]
+# A tibble: 38 × 1
+   ``                
+   &lt;chr&gt;             
+ 1 Name              
+ 2 Quay Walker LB    
+ 3 Isaiah McDuffie LB
+ 4 Javon Bullard S   
+ 5 Edgerrin Cooper LB
+ 6 Keisean Nixon CB  
+ 7 Xavier McKinney S 
+ 8 Eric Wilson LB    
+ 9 Evan Williams S   
+10 Eric Stokes CB    
+# ℹ 28 more rows
+
+[[5]]
+# A tibble: 13 × 1
+   ``                 
+   &lt;chr&gt;              
+ 1 Name               
+ 2 Brayden Narveson PK
+ 3 Tucker Kraft TE    
+ 4 Josh Jacobs RB     
+ 5 Jayden Reed WR     
+ 6 Dontayvion Wicks WR
+ 7 Brandon McManus PK 
+ 8 Christian Watson WR
+ 9 Romeo Doubs WR     
+10 Malik Willis QB    
+11 Jaire Alexander CB 
+12 Emanuel Wilson RB  
+13 Total              
+
+[[6]]
+# A tibble: 5 × 1
+  ``                 
+  &lt;chr&gt;              
+1 Name               
+2 Keisean Nixon CB   
+3 Corey Ballentine CB
+4 Jayden Reed WR     
+5 Total              
+
+[[7]]
+# A tibble: 4 × 1
+  ``                 
+  &lt;chr&gt;              
+1 Name               
+2 Brayden Narveson PK
+3 Brandon McManus PK 
+4 Total              
+
+[[8]]
+# A tibble: 2 × 1
+  Name           
+  &lt;chr&gt;          
+1 Daniel Whelan P
+2 Total          </code></pre>
+</div>
+</div>
+<p>Let’s check the names of these, as you can see it there are 8 different tables of information offered on this page.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>table_names <span class="ot">&lt;-</span> content <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">".ResponsiveTable.ResponsiveTable--fixed-left.mt5.remove_capitalize"</span>) <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">'.Table__Title'</span>) <span class="sc">%&gt;%</span>  <span class="fu">html_text</span>()</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>table_names</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Passing"   "Rushing"   "Receiving" "Defense"   "Scoring"   "Returning"
+[7] "Kicking"   "Punting"  </code></pre>
+</div>
+</div>
+<p>The information is separated into two sub entities, one for column name and the other with information about the team players. Lets try and obtain passing information.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>tables <span class="ot">&lt;-</span> content <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">".ResponsiveTable.ResponsiveTable--fixed-left.mt5.remove_capitalize"</span>) <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">".flex"</span>) </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="co">#passing is the first node of tables</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>passing_table <span class="ot">&lt;-</span> tables[<span class="dv">1</span>]</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="co"># numerical values in the passing table</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>table_number <span class="ot">&lt;-</span> passing_table <span class="sc">%&gt;%</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_elements</span>(<span class="st">".Table__ScrollerWrapper.relative.overflow-hidden"</span>) <span class="sc">%&gt;%</span>  </span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_elements</span>(<span class="st">".Table__Scroller"</span>) <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">".Table.Table--align-right"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a><span class="fu">html_elements</span>(<span class="st">".Table__TBODY"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a><span class="fu">html_elements</span>(<span class="st">"td"</span>)</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a><span class="co"># then realized there is a table function </span></span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a><span class="co"># column 1 separated as separate table</span></span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>col1 <span class="ot">&lt;-</span> passing_table <span class="sc">%&gt;%</span></span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_elements</span>(<span class="st">".Table.Table--align-right.Table--fixed.Table--fixed-left"</span>)<span class="sc">%&gt;%</span> </span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_table</span>()</span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>col1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1]]
+# A tibble: 3 × 1
+  Name           
+  &lt;chr&gt;          
+1 Jordan Love QB 
+2 Malik Willis QB
+3 Total          </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># numerical values of table, also seperate table</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>passing_table_num <span class="ot">&lt;-</span> passing_table<span class="sc">%&gt;%</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_elements</span>(<span class="st">".Table__ScrollerWrapper.relative.overflow-hidden"</span>) <span class="sc">%&gt;%</span> <span class="fu">html_table</span>() <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>passing_table_num</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  GP CMP ATT CMP.   YDS AVG YDS.G LNG TD INT SACK SYL   RTG
+1  6 124 201 61.7 1,547 7.7 257.8  70 15   9    7  62  91.8
+2  4  29  39 74.4   380 9.7  95.0  51  3   0    5  16 130.3
+3  8 153 240 63.8 1,927 8.0 240.9  70 18   9   12  78  98.0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>final_table <span class="ot">&lt;-</span> <span class="fu">bind_cols</span>(col1, passing_table_num)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>final_table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 14
+  Name      GP   CMP   ATT  CMP. YDS     AVG YDS.G   LNG    TD   INT  SACK   SYL
+  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+1 Jorda…     6   124   201  61.7 1,547   7.7  258.    70    15     9     7    62
+2 Malik…     4    29    39  74.4 380     9.7   95     51     3     0     5    16
+3 Total      8   153   240  63.8 1,927   8    241.    70    18     9    12    78
+# ℹ 1 more variable: RTG &lt;dbl&gt;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># is there a way to better properly read in data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s Now Try to do some aggregation from the data we pulled.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="co"># player data</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>player_table <span class="ot">&lt;-</span> final_table <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(Name) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Name <span class="sc">!=</span> <span class="st">'Total'</span>) </span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>player_table </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 14
+# Groups:   Name [2]
+  Name      GP   CMP   ATT  CMP. YDS     AVG YDS.G   LNG    TD   INT  SACK   SYL
+  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+1 Jorda…     6   124   201  61.7 1,547   7.7  258.    70    15     9     7    62
+2 Malik…     4    29    39  74.4 380     9.7   95     51     3     0     5    16
+# ℹ 1 more variable: RTG &lt;dbl&gt;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(player_table)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "Name"  "GP"    "CMP"   "ATT"   "CMP."  "YDS"   "AVG"   "YDS.G" "LNG"  
+[10] "TD"    "INT"   "SACK"  "SYL"   "RTG"  </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="do">## histogram</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> player_table, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> Name, <span class="at">y =</span> CMP)) <span class="sc">+</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">fill =</span> <span class="st">'green'</span>, <span class="at">color =</span> <span class="st">'gold'</span>) <span class="sc">+</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> CMP), <span class="at">color =</span><span class="st">'black'</span>) <span class="sc">+</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>( <span class="at">title =</span> <span class="st">"Histogram of Total Completions by Player"</span>,</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Player"</span>,</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Completions (CMP)"</span>,) <span class="sc">+</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Practicing-Webscraping_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Amount of receiving yards thrown.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(player_table, <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">""</span>, <span class="at">y =</span> YDS, <span class="at">fill =</span> Name)) <span class="sc">+</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">width =</span> <span class="dv">1</span>, <span class="at">color =</span> <span class="st">"white"</span>) <span class="sc">+</span>  <span class="co"># Create bar chart for pie slices</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_polar</span>(<span class="st">"y"</span>) <span class="sc">+</span>  <span class="co"># Convert to pie chart</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Yards by Player"</span>,</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Practicing-Webscraping_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Defensive Stats</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>def_table <span class="ot">&lt;-</span> tables[<span class="dv">4</span>] <span class="co"># it is the 4th index</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>col1 <span class="ot">&lt;-</span> def_table <span class="sc">%&gt;%</span>  <span class="fu">html_table</span>() <span class="sc">%&gt;%</span>  <span class="fu">as.data.frame</span>()</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>col1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                     Var.1   Var.2   Var.3   Var.4 Var.5  Var.6 Var.7
+1                     Name    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+2           Quay Walker LB    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+3       Isaiah McDuffie LB    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+4          Javon Bullard S    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+5       Edgerrin Cooper LB    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+6         Keisean Nixon CB    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+7        Xavier McKinney S    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+8           Eric Wilson LB    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+9          Evan Williams S    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+10          Eric Stokes CB    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+11          Rashan Gary DE    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+12          Kenny Clark DT    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+13       Lukas Van Ness DE    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+14        Preston Smith DE    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+15      Jaire Alexander CB    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+16    Kingsley Enagbare DE    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+17          T.J. Slaton DT    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+18          Karl Brooks DE    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+19        Devonte Wyatt DT    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+20         Colby Wooden DT    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+21        Zayne Anderson S    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+22        Ty'Ron Hopper LB    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+23     Corey Ballentine CB    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+24 Carrington Valentine CB    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+25     Christian Watson WR    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+26            Bo Melton WR    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+27          Matt Orzech LS    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+28            Josh Myers C    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+29          Romeo Doubs WR    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+30         Chris Brooks RB    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+31         Tucker Kraft TE    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+32            Sean Rhyan G    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+33     Dontayvion Wicks WR    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+34          Malik Heath WR    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+35        Elgton Jenkins G    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+36          Arron Mosby DE    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+37       Robert Rochell CB    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+38                   Total    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+39                         Tackles Tackles Tackles Sacks  Sacks Sacks
+40                      GP    SOLO     AST     TOT  SACK SCKYDS   TFL
+41                       7      39      13      52   1.5     13     4
+42                       8      26      24      50   0.5      0     0
+43                       8      31      14      45     0      0     1
+44                       8      24      14      38   2.5     24     5
+45                       8      26      10      36     2     14     4
+46                       8      26      10      36     1      8     2
+47                       8      20       9      29     2     17     7
+48                       8      18      10      28     0      0     1
+49                       8      16       7      23     0      0     0
+50                       8      10      10      20     2     12     2
+51                       8      11       9      20     0      0     2
+52                       8      14       4      18     1      4     4
+53                       8       6      10      16   2.5     21     2
+54                       6      15       1      16     0      0     0
+55                       8       5      10      15   1.5     20     1
+56                       8       4       9      13     0      0     0
+57                       8       6       6      12   1.5     12     1
+58                       5       8       2      10     3     16     6
+59                       5       2       5       7     0      0     0
+60                       8       6       0       6     0      0     0
+61                       8       2       2       4     0      0     0
+62                       7       4       0       4     0      0     0
+63                       6       0       3       3     0      0     0
+64                       7       2       0       2     0      0     0
+65                       8       1       1       2     0      0     0
+66                       8       1       0       1     0      0     0
+67                       8       0       1       1     0      0     0
+68                       7       1       0       1     0      0     0
+69                       6       0       1       1     0      0     0
+70                       8       0       1       1     0      0     0
+71                       8       1       0       1     0      0     0
+72                       8       1       0       1     0      0     0
+73                       7       1       0       1     0      0     0
+74                       8       1       0       1     0      0     0
+75                       7       1       0       1     0      0     0
+76                       4       1       0       1     0      0     0
+77                       8     362     195     557    21    159    42
+           Var.8         Var.9        Var.10        Var.11        Var.12
+1           &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+2           &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+3           &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+4           &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+5           &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+6           &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+7           &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+8           &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+9           &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+10          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+11          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+12          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+13          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+14          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+15          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+16          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+17          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+18          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+19          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+20          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+21          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+22          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+23          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+24          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+25          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+26          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+27          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+28          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+29          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+30          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+31          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+32          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+33          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+34          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+35          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+36          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+37          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+38          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
+39 Interceptions Interceptions Interceptions Interceptions Interceptions
+40            PD           INT           YDS           LNG            TD
+41             0             0             0             0             0
+42             2             0             0             0             0
+43             1             0             0             0             0
+44             2             0             0             0             0
+45             3             0             0             0             0
+46             7             6            63            28             0
+47             2             1             0             0             0
+48             3             1             1             1             0
+49             0             0             0             0             0
+50             1             0             0             0             0
+51             0             0             0             0             0
+52             0             0             0             0             0
+53             0             0             0             0             0
+54             7             2            52            35             1
+55             0             0             0             0             0
+56             0             0             0             0             0
+57             0             0             0             0             0
+58             0             0             0             0             0
+59             1             0             0             0             0
+60             0             0             0             0             0
+61             0             0             0             0             0
+62             0             0             0             0             0
+63             1             0             0             0             0
+64             0             0             0             0             0
+65             0             0             0             0             0
+66             0             0             0             0             0
+67             0             0             0             0             0
+68             0             0             0             0             0
+69             0             0             0             0             0
+70             0             0             0             0             0
+71             0             0             0             0             0
+72             0             0             0             0             0
+73             0             0             0             0             0
+74             0             0             0             0             0
+75             0             0             0             0             0
+76             0             0             0             0             0
+77            30            10           116            35             1
+    Var.13  Var.14  Var.15 Var.16
+1     &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+2     &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+3     &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+4     &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+5     &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+6     &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+7     &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+8     &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+9     &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+10    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+11    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+12    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+13    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+14    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+15    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+16    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+17    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+18    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+19    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+20    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+21    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+22    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+23    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+24    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+25    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+26    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+27    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+28    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+29    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+30    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+31    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+32    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+33    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+34    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+35    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+36    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+37    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+38    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
+39 Fumbles Fumbles Fumbles       
+40      FF      FR     FTD     KB
+41       0       0       0      0
+42       0       0       0      0
+43       0       0       0      0
+44       1       1       0      0
+45       1       0       0      0
+46       0       1       0      0
+47       1       0       0      0
+48       1       0       0      0
+49       0       0       0      0
+50       0       0       0      0
+51       0       1       0      0
+52       0       1       0      0
+53       0       0       0      0
+54       0       1       0      0
+55       2       0       0      0
+56       0       0       0      0
+57       1       1       0      0
+58       0       2       0      0
+59       0       0       0      1
+60       0       0       0      0
+61       0       0       0      0
+62       0       0       0      0
+63       0       0       0      0
+64       0       0       0      0
+65       0       1       0      0
+66       0       0       0      0
+67       0       0       0      0
+68       0       0       0      0
+69       0       0       0      0
+70       0       0       0      0
+71       0       0       0      0
+72       0       0       0      0
+73       0       0       0      0
+74       0       0       0      0
+75       0       0       0      0
+76       0       0       0      0
+77       7       9       0      1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>def_table_n <span class="ot">&lt;-</span> def_table <span class="sc">%&gt;%</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_elements</span>(<span class="st">".Table__ScrollerWrapper.relative.overflow-hidden"</span>) <span class="sc">%&gt;%</span> <span class="fu">html_table</span>() <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>def_table_n</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Var.1 Tackles Tackles.1 Tackles.2 Sacks Sacks.1 Sacks.2 Interceptions
+1     GP    SOLO       AST       TOT  SACK  SCKYDS     TFL            PD
+2      7      39        13        52   1.5      13       4             0
+3      8      26        24        50   0.5       0       0             2
+4      8      31        14        45     0       0       1             1
+5      8      24        14        38   2.5      24       5             2
+6      8      26        10        36     2      14       4             3
+7      8      26        10        36     1       8       2             7
+8      8      20         9        29     2      17       7             2
+9      8      18        10        28     0       0       1             3
+10     8      16         7        23     0       0       0             0
+11     8      10        10        20     2      12       2             1
+12     8      11         9        20     0       0       2             0
+13     8      14         4        18     1       4       4             0
+14     8       6        10        16   2.5      21       2             0
+15     6      15         1        16     0       0       0             7
+16     8       5        10        15   1.5      20       1             0
+17     8       4         9        13     0       0       0             0
+18     8       6         6        12   1.5      12       1             0
+19     5       8         2        10     3      16       6             0
+20     5       2         5         7     0       0       0             1
+21     8       6         0         6     0       0       0             0
+22     8       2         2         4     0       0       0             0
+23     7       4         0         4     0       0       0             0
+24     6       0         3         3     0       0       0             1
+25     7       2         0         2     0       0       0             0
+26     8       1         1         2     0       0       0             0
+27     8       1         0         1     0       0       0             0
+28     8       0         1         1     0       0       0             0
+29     7       1         0         1     0       0       0             0
+30     6       0         1         1     0       0       0             0
+31     8       0         1         1     0       0       0             0
+32     8       1         0         1     0       0       0             0
+33     8       1         0         1     0       0       0             0
+34     7       1         0         1     0       0       0             0
+35     8       1         0         1     0       0       0             0
+36     7       1         0         1     0       0       0             0
+37     4       1         0         1     0       0       0             0
+38     8     362       195       557    21     159      42            30
+   Interceptions.1 Interceptions.2 Interceptions.3 Interceptions.4 Fumbles
+1              INT             YDS             LNG              TD      FF
+2                0               0               0               0       0
+3                0               0               0               0       0
+4                0               0               0               0       0
+5                0               0               0               0       1
+6                0               0               0               0       1
+7                6              63              28               0       0
+8                1               0               0               0       1
+9                1               1               1               0       1
+10               0               0               0               0       0
+11               0               0               0               0       0
+12               0               0               0               0       0
+13               0               0               0               0       0
+14               0               0               0               0       0
+15               2              52              35               1       0
+16               0               0               0               0       2
+17               0               0               0               0       0
+18               0               0               0               0       1
+19               0               0               0               0       0
+20               0               0               0               0       0
+21               0               0               0               0       0
+22               0               0               0               0       0
+23               0               0               0               0       0
+24               0               0               0               0       0
+25               0               0               0               0       0
+26               0               0               0               0       0
+27               0               0               0               0       0
+28               0               0               0               0       0
+29               0               0               0               0       0
+30               0               0               0               0       0
+31               0               0               0               0       0
+32               0               0               0               0       0
+33               0               0               0               0       0
+34               0               0               0               0       0
+35               0               0               0               0       0
+36               0               0               0               0       0
+37               0               0               0               0       0
+38              10             116              35               1       7
+   Fumbles.1 Fumbles.2 Var.16
+1         FR       FTD     KB
+2          0         0      0
+3          0         0      0
+4          0         0      0
+5          1         0      0
+6          0         0      0
+7          1         0      0
+8          0         0      0
+9          0         0      0
+10         0         0      0
+11         0         0      0
+12         1         0      0
+13         1         0      0
+14         0         0      0
+15         1         0      0
+16         0         0      0
+17         0         0      0
+18         1         0      0
+19         2         0      0
+20         0         0      1
+21         0         0      0
+22         0         0      0
+23         0         0      0
+24         0         0      0
+25         0         0      0
+26         1         0      0
+27         0         0      0
+28         0         0      0
+29         0         0      0
+30         0         0      0
+31         0         0      0
+32         0         0      0
+33         0         0      0
+34         0         0      0
+35         0         0      0
+36         0         0      0
+37         0         0      0
+38         9         0      1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="do">### not finished</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="back-to-all-the-tables" class="level2">
+<h2 class="anchored" data-anchor-id="back-to-all-the-tables">Back to all the tables</h2>
+<p>Below you are able to see that we are able to pull all tables from the url page but the format is not what we want, what do we do?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>tables <span class="ot">&lt;-</span> content <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">".ResponsiveTable.ResponsiveTable--fixed-left.mt5.remove_capitalize"</span>) <span class="sc">%&gt;%</span> <span class="fu">html_table</span>()</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>tables</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1]]
+# A tibble: 7 × 13
+  Name   ``    ``    ``    ``    ``    ``    ``    ``    ``    ``    ``    ``   
+  &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+1 Jorda… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+2 Malik… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+3 Total  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+4 GP     CMP   ATT   CMP%  YDS   AVG   YDS/G LNG   TD    INT   SACK  SYL   RTG  
+5 6      124   201   61.7  1,547 7.7   257.8 70    15    9     7     62    91.8 
+6 4      29    39    74.4  380   9.7   95.0  51    3     0     5     16    130.3
+7 8      153   240   63.8  1,927 8.0   240.9 70    18    9     12    78    98.0 
+
+[[2]]
+# A tibble: 23 × 11
+   Name              ``    ``    ``    ``    ``    ``    ``    ``    ``    ``   
+   &lt;chr&gt;             &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+ 1 Josh Jacobs RB    &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 2 Emanuel Wilson RB &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 3 Malik Willis QB   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 4 Jayden Reed WR    &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 5 Chris Brooks RB   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 6 Bo Melton WR      &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 7 Jordan Love QB    &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 8 MarShawn Lloyd RB &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 9 Tucker Kraft TE   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+10 Christian Watson… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+# ℹ 13 more rows
+
+[[3]]
+# A tibble: 29 × 13
+   Name  ``    ``    ``    ``    ``    ``    ``    ``    ``    ``    ``    ``   
+   &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+ 1 Jayd… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 2 Rome… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 3 Tuck… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 4 Chri… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 5 Dont… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 6 Josh… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 7 Bo M… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 8 Eman… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 9 Ben … &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+10 Mali… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+# ℹ 19 more rows
+
+[[4]]
+# A tibble: 77 × 16
+   ``    ``    ``    ``    ``    ``    ``    ``    ``    ``    ``    ``    ``   
+   &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+ 1 Name  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 2 Quay… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 3 Isai… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 4 Javo… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 5 Edge… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 6 Keis… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 7 Xavi… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 8 Eric… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 9 Evan… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+10 Eric… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+# ℹ 67 more rows
+# ℹ 3 more variables: `` &lt;chr&gt;, `` &lt;chr&gt;, `` &lt;chr&gt;
+
+[[5]]
+# A tibble: 27 × 10
+   ``                  ``    ``    ``    ``    ``    ``    ``    ``    ``   
+   &lt;chr&gt;               &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+ 1 Name                &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 2 Brayden Narveson PK &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 3 Tucker Kraft TE     &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 4 Josh Jacobs RB      &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 5 Jayden Reed WR      &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 6 Dontayvion Wicks WR &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 7 Brandon McManus PK  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 8 Christian Watson WR &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 9 Romeo Doubs WR      &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+10 Malik Willis QB     &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+# ℹ 17 more rows
+
+[[6]]
+# A tibble: 11 × 12
+   ``          ``    ``    ``    ``    ``    ``    ``    ``    ``    ``    ``   
+   &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+ 1 "Name"      &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 2 "Keisean N… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 3 "Corey Bal… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 4 "Jayden Re… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 5 "Total"     &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+ 6 ""          Kick… Kick… Kick… Kick… Kick… Punts Punts Punts Punts Punts Punts
+ 7 "GP"        ATT   YDS   AVG   LNG   TD    ATT   YDS   AVG   LNG   TD    FC   
+ 8 "8"         5     142   28.4  37    0     4     48    12.0  39    0     0    
+ 9 "7"         0     0     0.0   0     0     1     0     0.0   0     0     0    
+10 "8"         0     0     0.0   0     0     6     41    6.8   13    0     11   
+11 "8"         5     142   28.4  37    0     11    89    8.1   39    0     11   
+
+[[7]]
+# A tibble: 9 × 13
+  ``     ``    ``    ``    ``    ``    ``    ``    ``    ``    ``    ``    ``   
+  &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+1 "Name" &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+2 "Bray… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+3 "Bran… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+4 "Tota… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+5 ""     Fiel… Fiel… Fiel… Fiel… Fiel… Fiel… Fiel… Fiel… Fiel… Extr… Extr… Extr…
+6 "GP"   FGM   FGA   FG%   LNG   1-19  20-29 30-39 40-49 50+   XPM   XPA   XP%  
+7 "6"    12    17    70.6  47    0-0   4-4   3-4   5-9   0-0   16    16    100.0
+8 "2"    4     4     100.0 45    0-0   1-1   2-2   1-1   0-0   6     6     100.0
+9 "8"    16    21    76.2  47    0-0   5-5   5-6   6-10  0-0   22    22    100.0
+
+[[8]]
+# A tibble: 5 × 13
+  Name   ``    ``    ``    ``    ``    ``    ``    ``    ``    ``    ``    ``   
+  &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+1 Danie… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+2 Total  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+3 GP     PUNTS YDS   LNG   AVG   NET   PBLK  IN20  TB    FC    ATT   YDS   AVG  
+4 8      29    1,394 74    48.1  44.0  0     11    2     10    11    77    7.0  
+5 8      29    1,394 74    48.1  45.4  0     11    2     10    11    77    7.0  </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Name Column</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>name_table <span class="ot">&lt;-</span> content <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">".ResponsiveTable.ResponsiveTable--fixed-left.mt5.remove_capitalize"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_elements</span>(<span class="st">".flex"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_elements</span>(<span class="st">".Table.Table--align-right.Table--fixed.Table--fixed-left"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_table</span>()</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a><span class="do">## numerical tables</span></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>num_table <span class="ot">&lt;-</span> content <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">".ResponsiveTable.ResponsiveTable--fixed-left.mt5.remove_capitalize"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_elements</span>(<span class="st">".flex"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_elements</span>(<span class="st">".Table__ScrollerWrapper.relative.overflow-hidden"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_table</span>()</span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a><span class="do">## bind each together</span></span>
+<span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a>final_tables_packers <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="st">"list"</span>, <span class="fu">length</span>(tables))</span>
+<span id="cb47-17"><a href="#cb47-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-18"><a href="#cb47-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(tables)){</span>
+<span id="cb47-19"><a href="#cb47-19" aria-hidden="true" tabindex="-1"></a>final_tables_packers[[i]] <span class="ot">&lt;-</span> <span class="fu">bind_cols</span>(<span class="fu">as.data.frame</span>(name_table[i]),</span>
+<span id="cb47-20"><a href="#cb47-20" aria-hidden="true" tabindex="-1"></a>                                  <span class="fu">as.data.frame</span>(num_table[i]))</span>
+<span id="cb47-21"><a href="#cb47-21" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+New names:
+New names:
+New names:
+• `Var.1` -&gt; `Var.1...1`
+• `Var.1` -&gt; `Var.1...2`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>final_tables_packers</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1]]
+             Name GP CMP ATT CMP.   YDS AVG YDS.G LNG TD INT SACK SYL   RTG
+1  Jordan Love QB  6 124 201 61.7 1,547 7.7 257.8  70 15   9    7  62  91.8
+2 Malik Willis QB  4  29  39 74.4   380 9.7  95.0  51  3   0    5  16 130.3
+3           Total  8 153 240 63.8 1,927 8.0 240.9  70 18   9   12  78  98.0
+
+[[2]]
+                  Name GP CAR   YDS  AVG LNG BIG TD YDS.G FUM LST FD
+1       Josh Jacobs RB  8 145   667  4.6  38   5  3  83.4   2   1 30
+2    Emanuel Wilson RB  8  51   226  4.4  18   0  0  28.3   0   0 10
+3      Malik Willis QB  4  16   137  8.6  29   3  1  34.3   0   0  6
+4       Jayden Reed WR  8  11   110 10.0  33   2  1  13.8   0   0  5
+5      Chris Brooks RB  6  11    40  3.6  11   0  0   6.7   0   0  3
+6         Bo Melton WR  8   5    34  6.8  16   0  0   4.3   0   0  3
+7       Jordan Love QB  6  10    28  2.8  12   0  0   4.7   0   0  4
+8    MarShawn Lloyd RB  1   6    15  2.5   5   0  0  15.0   0   0  0
+9      Tucker Kraft TE  8   1     2  2.0   2   0  0   0.3   0   0  1
+10 Christian Watson WR  7   1    -4 -4.0  -4   0  0  -0.6   0   0  0
+11               Total  8 257 1,255  4.9  38  10  5 156.9  10   1 62
+
+[[3]]
+                  Name GP REC TGTS   YDS  AVG TD LNG BIG YDS.G FUM LST YAC FD
+1       Jayden Reed WR  8  31   41   507 16.4  3  70   9  63.4   0   0 261 15
+2       Romeo Doubs WR  7  26   40   384 14.8  2  39   6  54.9   0   0  66 21
+3      Tucker Kraft TE  8  24   33   342 14.3  5  67   5  42.8   1   1 244 14
+4  Christian Watson WR  7  13   20   196 15.1  2  44   3  28.0   0   0  48  9
+5  Dontayvion Wicks WR  8  16   40   192 12.0  4  36   2  24.0   0   0  61 12
+6       Josh Jacobs RB  8  17   21   115  6.8  1  21   1  14.4   0   0 150  6
+7         Bo Melton WR  8   4    9    54 13.5  0  28   1   6.8   0   0   5  3
+8    Emanuel Wilson RB  8   8   11    45  5.6  1  30   1   5.6   0   0  80  3
+9          Ben Sims TE  8   3    4    40 13.3  0  28   1   5.0   0   0  15  1
+10      Malik Heath WR  7   4    5    26  6.5  0   9   0   3.7   0   0   5  1
+11    Luke Musgrave TE  4   5    7    22  4.4  0   6   0   5.5   0   0  15  1
+12   MarShawn Lloyd RB  1   1    1     3  3.0  0   3   0   3.0   0   0   8  0
+13     Chris Brooks RB  6   1    1     1  1.0  0   1   0   0.2   0   0   0  0
+14               Total  8 153  234 1,927 12.6 18  70  29 240.9   2   1 958 86
+
+[[4]]
+                 Var.1...1 Var.1...2 Tackles Tackles.1 Tackles.2 Sacks Sacks.1
+1                     Name        GP    SOLO       AST       TOT  SACK  SCKYDS
+2           Quay Walker LB         7      39        13        52   1.5      13
+3       Isaiah McDuffie LB         8      26        24        50   0.5       0
+4          Javon Bullard S         8      31        14        45     0       0
+5       Edgerrin Cooper LB         8      24        14        38   2.5      24
+6         Keisean Nixon CB         8      26        10        36     2      14
+7        Xavier McKinney S         8      26        10        36     1       8
+8           Eric Wilson LB         8      20         9        29     2      17
+9          Evan Williams S         8      18        10        28     0       0
+10          Eric Stokes CB         8      16         7        23     0       0
+11          Rashan Gary DE         8      10        10        20     2      12
+12          Kenny Clark DT         8      11         9        20     0       0
+13       Lukas Van Ness DE         8      14         4        18     1       4
+14        Preston Smith DE         8       6        10        16   2.5      21
+15      Jaire Alexander CB         6      15         1        16     0       0
+16    Kingsley Enagbare DE         8       5        10        15   1.5      20
+17          T.J. Slaton DT         8       4         9        13     0       0
+18          Karl Brooks DE         8       6         6        12   1.5      12
+19        Devonte Wyatt DT         5       8         2        10     3      16
+20         Colby Wooden DT         5       2         5         7     0       0
+21        Zayne Anderson S         8       6         0         6     0       0
+22        Ty'Ron Hopper LB         8       2         2         4     0       0
+23     Corey Ballentine CB         7       4         0         4     0       0
+24 Carrington Valentine CB         6       0         3         3     0       0
+25     Christian Watson WR         7       2         0         2     0       0
+26            Bo Melton WR         8       1         1         2     0       0
+27          Matt Orzech LS         8       1         0         1     0       0
+28            Josh Myers C         8       0         1         1     0       0
+29          Romeo Doubs WR         7       1         0         1     0       0
+30         Chris Brooks RB         6       0         1         1     0       0
+31         Tucker Kraft TE         8       0         1         1     0       0
+32            Sean Rhyan G         8       1         0         1     0       0
+33     Dontayvion Wicks WR         8       1         0         1     0       0
+34          Malik Heath WR         7       1         0         1     0       0
+35        Elgton Jenkins G         8       1         0         1     0       0
+36          Arron Mosby DE         7       1         0         1     0       0
+37       Robert Rochell CB         4       1         0         1     0       0
+38                   Total         8     362       195       557    21     159
+   Sacks.2 Interceptions Interceptions.1 Interceptions.2 Interceptions.3
+1      TFL            PD             INT             YDS             LNG
+2        4             0               0               0               0
+3        0             2               0               0               0
+4        1             1               0               0               0
+5        5             2               0               0               0
+6        4             3               0               0               0
+7        2             7               6              63              28
+8        7             2               1               0               0
+9        1             3               1               1               1
+10       0             0               0               0               0
+11       2             1               0               0               0
+12       2             0               0               0               0
+13       4             0               0               0               0
+14       2             0               0               0               0
+15       0             7               2              52              35
+16       1             0               0               0               0
+17       0             0               0               0               0
+18       1             0               0               0               0
+19       6             0               0               0               0
+20       0             1               0               0               0
+21       0             0               0               0               0
+22       0             0               0               0               0
+23       0             0               0               0               0
+24       0             1               0               0               0
+25       0             0               0               0               0
+26       0             0               0               0               0
+27       0             0               0               0               0
+28       0             0               0               0               0
+29       0             0               0               0               0
+30       0             0               0               0               0
+31       0             0               0               0               0
+32       0             0               0               0               0
+33       0             0               0               0               0
+34       0             0               0               0               0
+35       0             0               0               0               0
+36       0             0               0               0               0
+37       0             0               0               0               0
+38      42            30              10             116              35
+   Interceptions.4 Fumbles Fumbles.1 Fumbles.2 Var.16
+1               TD      FF        FR       FTD     KB
+2                0       0         0         0      0
+3                0       0         0         0      0
+4                0       0         0         0      0
+5                0       1         1         0      0
+6                0       1         0         0      0
+7                0       0         1         0      0
+8                0       1         0         0      0
+9                0       1         0         0      0
+10               0       0         0         0      0
+11               0       0         0         0      0
+12               0       0         1         0      0
+13               0       0         1         0      0
+14               0       0         0         0      0
+15               1       0         1         0      0
+16               0       2         0         0      0
+17               0       0         0         0      0
+18               0       1         1         0      0
+19               0       0         2         0      0
+20               0       0         0         0      1
+21               0       0         0         0      0
+22               0       0         0         0      0
+23               0       0         0         0      0
+24               0       0         0         0      0
+25               0       0         0         0      0
+26               0       0         1         0      0
+27               0       0         0         0      0
+28               0       0         0         0      0
+29               0       0         0         0      0
+30               0       0         0         0      0
+31               0       0         0         0      0
+32               0       0         0         0      0
+33               0       0         0         0      0
+34               0       0         0         0      0
+35               0       0         0         0      0
+36               0       0         0         0      0
+37               0       0         0         0      0
+38               1       7         9         0      1
+
+[[5]]
+             Var.1...1 Var.1...2 Touchdowns Touchdowns.1 Touchdowns.2
+1                 Name        GP       RUSH          REC          RET
+2  Brayden Narveson PK         6          0            0            0
+3      Tucker Kraft TE         8          0            5            0
+4       Josh Jacobs RB         8          3            1            0
+5       Jayden Reed WR         8          1            3            0
+6  Dontayvion Wicks WR         8          0            4            0
+7   Brandon McManus PK         2          0            0            0
+8  Christian Watson WR         7          0            2            0
+9       Romeo Doubs WR         7          0            2            0
+10     Malik Willis QB         4          1            0            0
+11  Jaire Alexander CB         6          0            0            1
+12   Emanuel Wilson RB         8          0            1            0
+13               Total         8          5           18            1
+   Touchdowns.3 Scoring Scoring.1 Scoring.2 Scoring.3 Scoring.4
+1            TD      FG       PAT       2PT       PTS      TP/G
+2             0      12        16         0        52       8.7
+3             5       0         0         1        32       4.0
+4             4       0         0         0        24       3.0
+5             4       0         0         0        24       3.0
+6             4       0         0         0        24       3.0
+7             0       4         6         0        18       9.0
+8             2       0         0         0        12       1.7
+9             2       0         0         0        12       1.7
+10            1       0         0         0         6       1.5
+11            1       0         0         0         6       1.0
+12            1       0         0         0         6       0.8
+13           24      16        22         1       216      27.0
+
+[[6]]
+            Var.1...1 Var.1...2 Kickoffs Kickoffs.1 Kickoffs.2 Kickoffs.3
+1                Name        GP      ATT        YDS        AVG        LNG
+2    Keisean Nixon CB         8        5        142       28.4         37
+3 Corey Ballentine CB         7        0          0        0.0          0
+4      Jayden Reed WR         8        0          0        0.0          0
+5               Total         8        5        142       28.4         37
+  Kickoffs.4 Punts Punts.1 Punts.2 Punts.3 Punts.4 Punts.5
+1         TD   ATT     YDS     AVG     LNG      TD      FC
+2          0     4      48    12.0      39       0       0
+3          0     1       0     0.0       0       0       0
+4          0     6      41     6.8      13       0      11
+5          0    11      89     8.1      39       0      11
+
+[[7]]
+            Var.1...1 Var.1...2 Field.Goals Field.Goals.1 Field.Goals.2
+1                Name        GP         FGM           FGA           FG%
+2 Brayden Narveson PK         6          12            17          70.6
+3  Brandon McManus PK         2           4             4         100.0
+4               Total         8          16            21          76.2
+  Field.Goals.3 Field.Goals.4 Field.Goals.5 Field.Goals.6 Field.Goals.7
+1           LNG          1-19         20-29         30-39         40-49
+2            47           0-0           4-4           3-4           5-9
+3            45           0-0           1-1           2-2           1-1
+4            47           0-0           5-5           5-6          6-10
+  Field.Goals.8 Extra.points Extra.points.1 Extra.points.2
+1           50+          XPM            XPA            XP%
+2           0-0           16             16          100.0
+3           0-0            6              6          100.0
+4           0-0           22             22          100.0
+
+[[8]]
+             Name GP PUNTS   YDS LNG  AVG  NET PBLK IN20 TB FC ATT YDS.1 AVG.1
+1 Daniel Whelan P  8    29 1,394  74 48.1 44.0    0   11  2 10  11    77     7
+2           Total  8    29 1,394  74 48.1 45.4    0   11  2 10  11    77     7</code></pre>
+</div>
+</div>
+<p>Let’s take a look at the distribution of tackles made by the team.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(janitor)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'janitor' was built under R version 4.3.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'janitor'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    chisq.test, fisher.test</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>def_stats <span class="ot">&lt;-</span> <span class="fu">row_to_names</span>(final_tables_packers[[<span class="dv">4</span>]], <span class="at">row_number =</span> <span class="dv">1</span>)</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>def_stats</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                      Name GP SOLO AST TOT SACK SCKYDS TFL PD INT YDS LNG TD FF
+2           Quay Walker LB  7   39  13  52  1.5     13   4  0   0   0   0  0  0
+3       Isaiah McDuffie LB  8   26  24  50  0.5      0   0  2   0   0   0  0  0
+4          Javon Bullard S  8   31  14  45    0      0   1  1   0   0   0  0  0
+5       Edgerrin Cooper LB  8   24  14  38  2.5     24   5  2   0   0   0  0  1
+6         Keisean Nixon CB  8   26  10  36    2     14   4  3   0   0   0  0  1
+7        Xavier McKinney S  8   26  10  36    1      8   2  7   6  63  28  0  0
+8           Eric Wilson LB  8   20   9  29    2     17   7  2   1   0   0  0  1
+9          Evan Williams S  8   18  10  28    0      0   1  3   1   1   1  0  1
+10          Eric Stokes CB  8   16   7  23    0      0   0  0   0   0   0  0  0
+11          Rashan Gary DE  8   10  10  20    2     12   2  1   0   0   0  0  0
+12          Kenny Clark DT  8   11   9  20    0      0   2  0   0   0   0  0  0
+13       Lukas Van Ness DE  8   14   4  18    1      4   4  0   0   0   0  0  0
+14        Preston Smith DE  8    6  10  16  2.5     21   2  0   0   0   0  0  0
+15      Jaire Alexander CB  6   15   1  16    0      0   0  7   2  52  35  1  0
+16    Kingsley Enagbare DE  8    5  10  15  1.5     20   1  0   0   0   0  0  2
+17          T.J. Slaton DT  8    4   9  13    0      0   0  0   0   0   0  0  0
+18          Karl Brooks DE  8    6   6  12  1.5     12   1  0   0   0   0  0  1
+19        Devonte Wyatt DT  5    8   2  10    3     16   6  0   0   0   0  0  0
+20         Colby Wooden DT  5    2   5   7    0      0   0  1   0   0   0  0  0
+21        Zayne Anderson S  8    6   0   6    0      0   0  0   0   0   0  0  0
+22        Ty'Ron Hopper LB  8    2   2   4    0      0   0  0   0   0   0  0  0
+23     Corey Ballentine CB  7    4   0   4    0      0   0  0   0   0   0  0  0
+24 Carrington Valentine CB  6    0   3   3    0      0   0  1   0   0   0  0  0
+25     Christian Watson WR  7    2   0   2    0      0   0  0   0   0   0  0  0
+26            Bo Melton WR  8    1   1   2    0      0   0  0   0   0   0  0  0
+27          Matt Orzech LS  8    1   0   1    0      0   0  0   0   0   0  0  0
+28            Josh Myers C  8    0   1   1    0      0   0  0   0   0   0  0  0
+29          Romeo Doubs WR  7    1   0   1    0      0   0  0   0   0   0  0  0
+30         Chris Brooks RB  6    0   1   1    0      0   0  0   0   0   0  0  0
+31         Tucker Kraft TE  8    0   1   1    0      0   0  0   0   0   0  0  0
+32            Sean Rhyan G  8    1   0   1    0      0   0  0   0   0   0  0  0
+33     Dontayvion Wicks WR  8    1   0   1    0      0   0  0   0   0   0  0  0
+34          Malik Heath WR  7    1   0   1    0      0   0  0   0   0   0  0  0
+35        Elgton Jenkins G  8    1   0   1    0      0   0  0   0   0   0  0  0
+36          Arron Mosby DE  7    1   0   1    0      0   0  0   0   0   0  0  0
+37       Robert Rochell CB  4    1   0   1    0      0   0  0   0   0   0  0  0
+38                   Total  8  362 195 557   21    159  42 30  10 116  35  1  7
+   FR FTD KB
+2   0   0  0
+3   0   0  0
+4   0   0  0
+5   1   0  0
+6   0   0  0
+7   1   0  0
+8   0   0  0
+9   0   0  0
+10  0   0  0
+11  0   0  0
+12  1   0  0
+13  1   0  0
+14  0   0  0
+15  1   0  0
+16  0   0  0
+17  0   0  0
+18  1   0  0
+19  2   0  0
+20  0   0  1
+21  0   0  0
+22  0   0  0
+23  0   0  0
+24  0   0  0
+25  0   0  0
+26  1   0  0
+27  0   0  0
+28  0   0  0
+29  0   0  0
+30  0   0  0
+31  0   0  0
+32  0   0  0
+33  0   0  0
+34  0   0  0
+35  0   0  0
+36  0   0  0
+37  0   0  0
+38  9   0  1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>def_stats <span class="ot">&lt;-</span> def_stats <span class="sc">%&gt;%</span> </span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Name <span class="sc">!=</span> <span class="st">"Total"</span>)</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(def_stats, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x=</span> <span class="fu">reorder</span>(Name, <span class="sc">-</span><span class="fu">as.numeric</span>(SOLO)),  <span class="at">y=</span> <span class="fu">as.numeric</span>(SOLO))) <span class="sc">+</span></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">fill=</span> <span class="st">'black'</span>) <span class="sc">+</span>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Name"</span>, <span class="at">y =</span> <span class="st">"Tackles"</span>) <span class="sc">+</span> </span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> SOLO, <span class="at">color =</span><span class="st">'red'</span> ), <span class="at">vjust =</span> <span class="sc">-</span>.<span class="dv">5</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span><span class="dv">1</span>, <span class="at">size =</span> <span class="dv">6</span>)) <span class="sc">+</span> <span class="fu">ylim</span>(<span class="dv">0</span>, <span class="dv">100</span>) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Tackler Distribution for the Green Bay Packers"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Practicing-Webscraping_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

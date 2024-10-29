@@ -1,0 +1,246 @@
+---
+title: "Webscraping practice"
+format: html
+editor: visual
+---
+
+## Setting Up
+
+```{r ,Warning= FALSE, Message=FALSE}
+library(tidyverse)
+library(rvest)
+```
+
+
+## URL
+
+Let's load in the URL and see the different elements 
+```{r}
+url <- "https://www.espn.com/nfl/team/stats/_/name/gb/green-bay-packers"
+
+html <-read_html(url)
+
+section <- html %>% html_elements("section")
+section
+```
+Since we see the elements of different sections we can deep further down into the section with class = "card". We will index the second node.
+
+```{r}
+content <- section[2] %>% html_elements(".Wrapper.Card__Content")
+```
+
+::: note
+When class attribute is separated by spaces in this case class "Wrapper Card__Content" it means this <div> has two classes "wrapper" and "card__content"/
+We now have access to both and the whole page. 
+:::
+
+Let's now try and get the information of team leaders in various statistics like passing yards, rushing years, etc. First we grab the title of all statistics and as you see from the banner there is 5 different statistics on the banner. 
+
+```{r}
+
+team_leaders <- content %>% html_elements(".ResponsiveWrapper") %>%  html_elements(".StatLeaders") %>% html_elements(".Athlete.db.flex-expand.Athlete__Link.clr-gray-01") 
+
+stat_names <- team_leaders  %>%  
+  html_elements("h2") %>% 
+  html_text2()
+
+stat_names
+```
+
+Now lets try and pull the name and statistic
+```{r}
+name <- team_leaders %>% html_elements(".Athlete__PlayerWrapper.flex.justify-center.flex-column.flex-expand") %>%
+  html_elements(".di.flex.items-baseline.n8") %>% 
+  html_elements(".Athlete__PlayerName") %>% html_text()
+
+position <- team_leaders %>% html_elements(".Athlete__PlayerWrapper.flex.justify-center.flex-column.flex-expand") %>%
+  html_elements(".di.flex.items-baseline.n8") %>%
+  html_elements(".Athlete__NameDetails.ml2.clr-gray-04.di.ns9") %>%
+  html_text2()
+
+statistic <- team_leaders %>% html_elements(".Athlete__PlayerWrapper.flex.justify-center.flex-column.flex-expand") %>%
+  html_elements(".flex.items-center.justify-between") %>% 
+  html_elements(".clr-gray-01.pr3.hs2") %>%   html_text()
+
+name
+position
+statistic
+
+```
+Now we have gotten the name, position, statistic and static name for the team leaders. Lets make a tibble.
+
+```{r}
+packer_leaders <- tibble(Name=name, Position = position, Amount = statistic, "Type" = stat_names)
+
+packer_leaders
+```
+Now we have a tibble of the 5 statistics leaders of the green bay packers.
+
+
+
+
+## Tables
+
+Let's see if we can pull information from the tables. Here we are able to get the 8 tables the url offers. Team statistics
+```{r}
+table_col1 <- content %>% html_elements(".ResponsiveTable.ResponsiveTable--fixed-left.mt5.remove_capitalize") %>%  html_elements(".flex")  %>% html_elements(".Table.Table--align-right.Table--fixed.Table--fixed-left")%>% html_table()
+
+table_col1
+
+```
+Let's check the names of these, as you can see it there are 8 different tables of information offered on this page.
+```{r}
+table_names <- content %>% html_elements(".ResponsiveTable.ResponsiveTable--fixed-left.mt5.remove_capitalize") %>% html_elements('.Table__Title') %>%  html_text()
+
+table_names
+```
+
+The information is separated into two sub entities, one for column name and the other with information about the team players. Lets try and obtain passing information.
+
+```{r}
+tables <- content %>% html_elements(".ResponsiveTable.ResponsiveTable--fixed-left.mt5.remove_capitalize") %>% html_elements(".flex") 
+
+#passing is the first node of tables
+
+passing_table <- tables[1]
+
+
+# numerical values in the passing table
+
+table_number <- passing_table %>%
+  html_elements(".Table__ScrollerWrapper.relative.overflow-hidden") %>%  
+  html_elements(".Table__Scroller") %>% html_elements(".Table.Table--align-right") %>%
+html_elements(".Table__TBODY") %>% 
+html_elements("td")
+
+
+# then realized there is a table function 
+
+# column 1 separated as separate table
+col1 <- passing_table %>%
+  html_elements(".Table.Table--align-right.Table--fixed.Table--fixed-left")%>% 
+  html_table()
+col1
+
+# numerical values of table, also seperate table
+passing_table_num <- passing_table%>%
+  html_elements(".Table__ScrollerWrapper.relative.overflow-hidden") %>% html_table() %>% as.data.frame()
+
+passing_table_num
+
+final_table <- bind_cols(col1, passing_table_num)
+
+final_table
+
+# is there a way to better properly read in data
+```
+
+Let's Now Try to do some aggregation from the data we pulled.
+
+```{r}
+library(ggplot2)
+# player data
+player_table <- final_table %>% group_by(Name) %>% filter(Name != 'Total') 
+
+player_table 
+
+colnames(player_table)
+## histogram
+
+
+ggplot(data = player_table, mapping = aes(x = Name, y = CMP)) +
+  geom_bar(stat = "identity", fill = 'green', color = 'gold') +
+  geom_text(aes(label = CMP), color ='black') +
+    labs( title = "Histogram of Total Completions by Player",
+       x = "Player",
+       y = "Completions (CMP)",) +
+  theme_minimal()
+```
+
+Amount of receiving yards thrown.
+```{r}
+
+ggplot(player_table, aes(x = "", y = YDS, fill = Name)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +  # Create bar chart for pie slices
+  coord_polar("y") +  # Convert to pie chart
+  labs(
+    title = "Yards by Player",
+    x = NULL,
+    y = NULL
+  )
+
+```
+
+**Defensive Stats**
+
+```{r}
+def_table <- tables[4] # it is the 4th index
+col1 <- def_table %>%  html_table() %>%  as.data.frame()
+
+col1
+
+def_table_n <- def_table %>%
+  html_elements(".Table__ScrollerWrapper.relative.overflow-hidden") %>% html_table() %>% as.data.frame()
+
+def_table_n
+
+### not finished
+```
+
+## Back to all the tables
+
+Below you are able to see that we are able to pull all tables from the url page but the format is not what we want, what do we do?
+```{r}
+tables <- content %>% html_elements(".ResponsiveTable.ResponsiveTable--fixed-left.mt5.remove_capitalize") %>% html_table()
+tables
+```
+
+
+
+
+```{r}
+# Name Column
+name_table <- content %>% html_elements(".ResponsiveTable.ResponsiveTable--fixed-left.mt5.remove_capitalize") %>% 
+  html_elements(".flex") %>%
+  html_elements(".Table.Table--align-right.Table--fixed.Table--fixed-left") %>% 
+  html_table()
+  
+
+## numerical tables
+num_table <- content %>% html_elements(".ResponsiveTable.ResponsiveTable--fixed-left.mt5.remove_capitalize") %>% 
+  html_elements(".flex") %>%
+  html_elements(".Table__ScrollerWrapper.relative.overflow-hidden") %>% 
+  html_table()
+
+
+## bind each together
+final_tables_packers <- vector("list", length(tables))
+
+for (i in 1:length(tables)){
+final_tables_packers[[i]] <- bind_cols(as.data.frame(name_table[i]),
+                                  as.data.frame(num_table[i]))
+}
+
+final_tables_packers
+```
+
+Let's take a look at the distribution of tackles made by the team.
+
+```{r}
+library(janitor)
+
+def_stats <- row_to_names(final_tables_packers[[4]], row_number = 1)
+
+def_stats
+
+def_stats <- def_stats %>% 
+  filter(Name != "Total")
+
+ggplot(def_stats, mapping = aes(x= reorder(Name, -as.numeric(SOLO)),  y= as.numeric(SOLO))) +
+  geom_bar(stat = "identity", fill= 'black') +  labs(x = "Name", y = "Tackles") + 
+  geom_text(aes(label = SOLO, color ='red' ), vjust = -.5, size = 2) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust =1, size = 6)) + ylim(0, 100) + labs(title = "Tackler Distribution for the Green Bay Packers")
+```
+
+

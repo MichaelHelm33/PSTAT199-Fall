@@ -1,0 +1,198 @@
+---
+title: "Quarto Presentation Notes"
+subtitle: "Here we will include notes for the presentation style that quarto offers."
+author: "Michael Helm"
+format: 
+  revealjs:
+    theme: sky
+    incremental: true   
+---
+
+
+
+## Presentation Themes
+
+There are 11 built in themes you are able to use with the yaml for presentations.
+
+::: {.columns}
+::: {.column}
+`theme:`
+
+1.  beige
+2.  blood
+3.  dark
+4.  default
+5.  league
+6.  moon
+:::
+
+::: {.column}
+
+7.  night
+8.  serif
+9.  simple
+10. sky
+11. solarized
+:::
+:::
+  
+## Lists 
+::: {.columns} 
+
+::: {.column}
+::: {.incremental}
+
+**Local**
+
+Using `:::{.incremental}` locally allows for bullet points to incrementally show 
+
+- item 1
+- item 2
+- item 3
+:::
+:::
+
+:::{.column}
+
+**Global**
+
+Globally you can add this options within the yaml, by using `incremental: true` under `revealjs`.
+
+- item 1
+- item 2
+- item 3
+
+::: 
+
+:::
+
+
+## Pauses  
+
+Same idea as previous slide but is down with things that do not need to be incremental
+
+::: {.fragment fragment-index=1} 
+
+Here is before the pause
+
+:::
+
+::: {.fragment fragment-index=2}
+
+Here is after the pause
+
+:::
+
+## Fragments
+
+::: columns
+::: {.column}
+::: {.fragment .fade-in-then-out}
+Fade out
+:::
+:::
+
+
+::: {.column}
+::: {.fragment .fade-in}
+::: {.fragment .grow}
+::: {.fragment .semi-fade-out}
+Fade in then GROW then fade semi out
+:::
+:::
+:::
+:::
+
+::: {.column}
+::: {.fragment .fade-up}
+Slide up while fading in
+:::
+:::
+:::  
+
+## Fragments continued
+
+Certain Commands to pair with `{.fragment ...}
+
+
+1. `fade-out`, start visible and fade out
+  1 . there is also `-up`, `-down`, `-left`, `-right`, `-in-then-semi-out`
+2. `grow`, scales up the text
+3. `semi-fade-out`, fades out 50%
+4. `shrink`
+5. `strike`, strikethrough
+6. `highlight-red`, `highlight-blue`, `highlight-green`, turns the text the color
+7. ``highlight-current-red` will turn text red then back to original the step after
+
+
+## Callouts
+
+::: {.callout-warning}
+We have notes on call outs in our markdown file
+:::
+
+::: {.callout-note}
+for notes
+:::
+
+::: {.callout-tip}
+practice makes perfect
+:::
+
+::: {.callout-caution}
+be careful
+:::
+
+## Tabsets
+
+Useful when trying to display content side by side
+
+::: panel-tabset
+
+### Tab 1
+Here tab 1
+
+### Tab 2
+Here tab 2
+
+### Tab 3
+Lastly is tab 3
+
+:::
+
+### Code Output
+
+
+
+
+```{r message = FALSE}
+
+#| label: starwars-heights-default-output
+#| tbl-cap: "A table of maximum and minimum heights for each homeworld in Starwars."
+#| output-location: fragment
+
+library(tidyverse)
+
+starwars %>% 
+  group_by(homeworld) %>% 
+  summarize(max_height = max(height), 
+            min_height = min(height)
+            ) %>% 
+  slice_max(order_by = max_height, n = 5) %>% 
+  gt::gt() %>% 
+  gt::cols_label(homeworld = "Homeworld", 
+             max_height = "Maximum Height", 
+             min_height = "Minimum Height")
+```
+
+
+```
+
+
+
+
+## Questions 
+
+1. How do I create [pauses](#pauses) /breaks similar to incremental but with things that are not ? 
+2. 
+

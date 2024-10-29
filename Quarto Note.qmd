@@ -31,12 +31,13 @@ format:
     citation-location: margin         # citations go into margins
     embed-resources: true
     code-tools: true
----  
 ---
+
+------------------------------------------------------------------------
 
 # Questions
 
-1. When would we use Yaml commands like:
+1.  When would we use Yaml commands like:
 
 -   toi
 
@@ -44,15 +45,13 @@ format:
 
 -   notebook-view
 
-2. How do I get the photos to load in correctly? [Uneven Columns Section](#uneven-columns)
+2.  How do I get the photos to load in correctly? [Uneven Columns Section](#uneven-columns)
 
-3. When you render a quarto document, how does it work, it just updates the same file?
+3.  When you render a quarto document, how does it work, it just updates the same file?
 
-4. Does ::: denote options in quarto?
+4.  Does ::: denote options in quarto?
 
-5. 
-
-
+5.  
 
 # Quarto
 
@@ -78,10 +77,10 @@ format:
 
 @fig-airquality further explores the impact of temperature on ozone level.
 
-- To create the link above we used `@name` as well as these options within the R chunk
-  - #| label: fig-airquality
-  - #| fig-cap: Temperature and ozone level.
-  - #| warning: false
+-   To create the link above we used `@name` as well as these options within the R chunk
+    -   #\| label: fig-airquality
+    -   #\| fig-cap: Temperature and ozone level.
+    -   #\| warning: false
 
 ```{r}
 #| label: fig-airquality
@@ -123,35 +122,32 @@ penguins |>
 
 ## Quarto Commands
 
-### Uneven Columns
+### Uneven Columns {#uneven-columns}
 
-::: {.columns}
-::: {.column width=25%}
+::::: columns
+::: {.column width="25%"}
 **Column 1**
 
-+ item 1
-+ item 2
+-   item 1
+-   item 2
+:::
 
-::: 
-::: {.column width=75%}
+::: {.column width="75%"}
 **Column 2**
 
-![Practice Photo](~/UCSB College/PSTAT 122/Screenshots/Exercise 2.8.png){.lightbox}
+![Practice Photo](~/UCSB%20College/PSTAT%20122/Screenshots/Exercise%202.8.png){.lightbox}
 :::
-:::
-
+:::::
 
 ## Callouts
+
 ::: {.callout-note collapse="true"}
-
-- There are five types of callouts: note, tip, warning, caution, and important.
-- You can add headers to callouts same way you would normally would
-- {.callout-note collapse="true"} makes them collapsible 
-
+-   There are five types of callouts: note, tip, warning, caution, and important.
+-   You can add headers to callouts same way you would normally would
+-   {.callout-note collapse="true"} makes them collapsible
 :::
 
-
-:::  callout-tip
+::: callout-tip
 Here you go
 :::
 
@@ -167,16 +163,14 @@ oh noooo
 make sure you see this
 :::
 
-
 ## Creating Tabs
 
 ::: panel-tabset
-
 ### Tab 1
 
 This is Tab 1 using ::: panel-tabset
 
-###  Tab 2
+### Tab 2
 
 This is Tab 2
 :::
@@ -187,17 +181,16 @@ Here is a footnote[^1]
 
 [^1]: Here is one way to footnote
 
-and another^[Here is the other footnote.]
+and another[^2]
 
+[^2]: Here is the other footnote.
 
 ## In the Margins
 
-Use `#| column: margin and output/code will be in margin like below
+Use \`#\| column: margin and output/code will be in margin like below
 
 ```{r}
 #| column: margin
 
 mtcars[1:6, 1:3]
 ```
-
-

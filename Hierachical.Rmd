@@ -1,0 +1,285 @@
+---
+title: "Hierarchical Data"
+author: "Michael Helm"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Hierachical data
+
+## Lists
+
+Lists can hold different types of elemtents
+```{r}
+x1 <- list(1:4, "a", TRUE)
+x1
+```
+
+
+We can often name the components or children of a list by naming the column of a tibble 
+
+```{r}
+x2 <- list(a = 1:2, b = 1:3, c = 1:4)
+x2
+```
+
+The function strucure can be shown with `str()`
+
+```{r}
+str(x1)
+
+str(x2)
+```
+## Hierarchy 
+
+Lists can also include lists within them
+
+```{r}
+x3 <- list(list(1, 2), list(3, 4))
+str(x3)
+```
+
+`C()` will create a flat vector. Function `str()` gets more useful as the the list gets more complex
+
+```{r}
+x5 <- list(1, list(2, list(3, list(4, list(5)))))
+str(x5)
+```
+## List-Columns 
+
+Lists can also live inside a tibble where we call them list-columns.
+
+
+```{r}
+library(tibble)
+library(tidyr)
+library(dplyr)
+
+df <- tibble(x = 1:2, 
+  y = c("a", "b"),
+  z = list(list(1, 2), list(3, 4, 5))
+)
+df
+```
+
+## Unnesting
+
+
+With a named list like exactly below, they would unnest into different columns. Below x would contain elements 1, 2, 3 and y would contain a list of 2 numbers that are named.
+
+```{r}
+df1 <- tribble(
+  ~x, ~y,
+  1, list(a = 11, b = 12),
+  2, list(a = 21, b = 22),
+  3, list(a = 31, b = 32),
+)
+
+df1 |> 
+  unnest_wider(y)
+
+df1 |> 
+  unnest_wider(y, names_sep = "_")
+```
+
+Now if the children are unamed then they would unest into rows 
+
+```{r}
+df2 <- tribble(
+  ~x, ~y,
+  1, list(11, 12, 13),
+  2, list(21),
+  3, list(31, 32),
+)
+
+df2 |> 
+  unnest_longer(y)
+```
+
+let's take a look of what happens when there is an empty element
+```{r}
+df6 <- tribble(
+  ~x, ~y,
+  "a", list(1, 2),
+  "b", list(3),
+  "c", list()
+)
+df6 |> unnest_longer(y)
+```
+
+There is also the fucntion of `unest_auto()`that chooses between longer and wider
+
+## Case Studies 
+
+gh_repos is a list, but our tools work with list-columns, so we’ll begin by putting it into a tibble.
+
+```{r}
+library(repurrrsive)
+
+repos <- tibble(json = gh_repos)
+repos
+```
+
+As you see the `gh_repos` is a list of a list. There are 6 list with 26 or 30 elements. We made it into a tibble. If we now use `unest_longer()` we put each child in it's own row. If we use both longer and wider than then we can put each element into its own column
+
+```{r}
+repos |> 
+  unnest_longer(json)
+```
+
+Since each element is named list we can use `unnest_wider()` to put wach element into its column
+
+```{r}
+repos |> 
+  unnest_longer(json) |> 
+  unnest_wider(json) 
+```
+
+IF we want to find the names of each column
+```{r}
+repos |> 
+  unnest_longer(json) |> 
+  unnest_wider(json) |> 
+  names() |> 
+  head(10)
+```
+
+```{r}
+repos |> 
+  unnest_longer(json) |> 
+  unnest_wider(json) |> 
+  select(id, full_name, owner, description) |> 
+  unnest_wider(owner, names_sep = "_") ##if we stop here there is an error since owner is 
+## a list that contains a cloumn id so we add names_sep to account for that
+```
+
+## Relational data
+
+Below is data about character in the Game of Thrones
+```{r}
+chars <- tibble(json = got_chars)
+
+chars %>%
+  unnest_wider(json) %>%
+  select(id, name, gender, culture, born, died, alive)
+```
+
+Exploring the titles column
+```{r}
+chars |> 
+  unnest_wider(json) |> 
+  select(id, titles) |> 
+  unnest_longer(titles)
+```
+
+
+Using hoist will allow a
+
+
+
+## JSON
+
+JSON is short for javascript object notation and is the common way web API return data. Was made to be easily read by computers but not humans.
+
+There our six key data types. Four of them are scalars.
+- sting
+- number
+- boolean 
+- null
+
+There is a an
+- arrary, an unamed list in []
+- object, is like a named list in {}, {'c' = 2}
+
+Json does not have a native way to represent dates or date-times. Will need to use
+- readr::parse_date()
+- readr::parse_datetime()
+- readr::parse_double()
+
+### jsonlite
+
+When in R we will use the `jsonlite` package. We will use functions. 
+
+- `read_json()` and `parse_json()`
+- in real lide youll use read_json to read a JSON file from disk
+- The repurrsive package `gh_user` used earlier can be read in by `read_json()`
+
+```{r}
+library(jsonlite)
+library(purrr)
+
+gh_users_json()
+
+gh_user2 <- read_json(gh_users_json())
+```
+
+```{r}
+
+str(parse_json('1'))
+
+str(parse_json('[1, 2, 3]'))
+
+str(parse_json('{"x": [1, 2, 3]}'))
+
+```
+
+
+
+In most cases JSON files contain a sinfle top level array, because they're designed to provide data about multiple things
+
+```{r}
+json <- '[
+  {"name": "John", "age": 34},
+  {"name": "Susan", "age": 27}
+]'
+df <- tibble(json = parse_json(json))
+df
+
+
+df |> 
+  unnest_wider(json)
+
+```
+
+If JSON file consists of a sinfle top-level JSON object, representing one "thing. We start the rectangling process by wrapping it in a list, before you put it in a tibble.
+
+
+
+```{r}
+json <- '{
+  "status": "OK", 
+  "results": [
+    {"name": "John", "age": 34},
+    {"name": "Susan", "age": 27}
+ ]
+}
+'
+df <- tibble(json = list(parse_json(json)))
+df
+
+
+df |> 
+  unnest_wider(json) |> 
+  unnest_longer(results) |> 
+  unnest_wider(results)
+
+```
+
+or
+
+```{r}
+df <- tibble(results = parse_json(json)$results)
+df |> 
+  unnest_wider(results)
+```
+
+## Questions
+
+What is a list vs tibble vs dataframe?
+
+How can we tell a single top-level array representing multiple things vs. a single top-level array representing a single thing?
+
+Rectangling Process? 
+
+Tibble vs tribble?
+

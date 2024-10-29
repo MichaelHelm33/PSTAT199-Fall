@@ -1,0 +1,321 @@
+---
+title: "Import/Webscaping"
+author: "Michael Helm"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Excel 
+
+- `read_excel`() can read files with both xls and xlsx format. It guesses the file type based on the input.
+  - there is the argument `col_names` which takes in a vector if you wish to rename the columns. use it with `skip = 1`
+  - `na` = c(" ", NA, N/A) will make na
+  - if there a multiple spreadsheets in an excel file use aregument `spreadsheet =` to specify
+  - `writexl::write_xlsx`
+  
+## Google Sheets 
+
+- `read_sheet()` is used to read in
+- `sheet_names()` 
+- `write_sheet(df, ss = "name", sheet = "sheet")`
+- can specify authentication with gs_4auth(email = 'mine@ucsb.edu')
+  
+## Databases basics
+
+- DBMS are database management systems
+  - Client-server DBMS’s run on a powerful central server, which you connect from your computer (the client). They are great for sharing data with multiple people in an organization. Popular client-server DBMS’s include PostgreSQL, MariaDB, SQL Server, and Oracle.
+Cloud 
+  - DBMS’s, like Snowflake, Amazon’s RedShift, and Google’s BigQuery, are similar to client server DBMS’s, but they run in the cloud. This means that they can easily handle extremely large datasets and can automatically provide more compute resources as needed.
+  - In-process DBMS’s, like SQLite or duckdb, run entirely on your computer. They’re great for working with large datasets where you’re the primary use
+  
+- In R we use `DBI` package  you create a database connection using `DBI::dbConnect()`. We use `duckdb::duckdb()`
+
+```{r}
+library(duckdb)
+con <- DBI::dbConnect(duckdb::duckdb(), dbdir = "duckdb")
+```
+
+
+```{r}
+dbWriteTable(con, "mpg", ggplot2::mpg) # writes table in db
+dbWriteTable(con, "diamonds", ggplot2::diamonds)
+```
+
+
+- There is also `duckdb_read_csv()` 
+
+```{r}
+library(tidyverse)
+
+dbListTables(con) # list all tables in db
+
+con |> 
+  dbReadTable("diamonds") |> # retrieves contents
+  as_tibble() # func above outputs in data frame
+```
+
+Using SQL we can filter with the function `dbGetQuery()`
+
+```{r}
+sql <- "
+  SELECT carat, cut, clarity, color, price 
+  FROM diamonds 
+  WHERE price > 15000
+"
+as_tibble(dbGetQuery(con, sql))
+```
+
+
+## dplyr Basics
+
+
+
+```{r}
+library(dbplyr)
+
+diamonds_db <- tbl(con, sql("SELECT * FROM diamonds"))
+
+big_diamonds_db <- diamonds_db |> 
+  filter(price > 15000) |> 
+  select(carat:clarity, price)
+
+
+## shows conversion to SQL from R 
+
+big_diamonds_db |>
+  show_query()
+```
+Using `collect()` we can return the SQL aggregated data from the diamonds_db
+
+```{r}
+big_diamonds <- big_diamonds_db |> 
+  collect()
+big_diamonds
+```
+
+!!!!!!!!!!!!!!!!!!!!!SQL!!!!!!!!!!!!!!!!!
+
+## SQL 
+
+We will use flights and planes table
+```{r}
+dbplyr::copy_nycflights13(con)
+
+flights <- tbl(con, "flights")
+planes <- tbl(con, "planes")
+```
+
+
+- `show_query()` will give you the query that the
+- `select()` takes the columns you want
+- `rename()` allows columns to be renamed
+- `relocate()` repoistions the columns
+
+```{r}
+library(DBI)
+library(dbplyr)
+library(tidyverse)
+
+planes %>%
+  select(tailnum, type, manufacturer, model, year) %>% #which columns
+  rename(year_built = year) %>%  ## allows columns to renamed
+  relocate(manufacturer, model, .before = type) %>%
+  show_query()
+
+```
+- `mutate()` is like aliasing in sql
+
+```{r}
+flights |> 
+  mutate(
+    speed = distance / (air_time / 60)
+  ) |> 
+  show_query()
+```
+
+- `From` in sql shows where the data source is 
+- Using the `group_by()` function in R
+
+```{r}
+diamonds_db |> 
+  group_by(cut) |> 
+  summarize(
+    n = n(),
+    avg_price = mean(price, na.rm = TRUE)
+  ) |> 
+  show_query()
+```
+- In R the `Where` in sql is the `filter()` function, it uses double == while where would be 1
+
+```{r}
+flights |> 
+  filter(dest == "IAH" | dest == "HOU") |>  # for or |, for and &
+  show_query()
+```
+Another where or filter would be 
+
+```{r}
+flights %>%
+  filter(dest %in% c("IAH", "HOU")) %>%
+  show_query()
+```
+
+- Now if below you use filter and summarize then `having` will be instead of `where`
+
+```{r}
+diamonds_db |> 
+  group_by(cut) |> 
+  summarize(n = n()) |> 
+  filter(n > 100) |> 
+  show_query()
+```
+- There is also `Order By` in sql that is the function `arrange()` in r
+```{r}
+flights |> 
+  arrange(year, month, day, desc(dep_delay)) |> 
+  show_query()
+```
+
+- Subqueries
+
+```{r}
+flights |> 
+  mutate(
+    year1 = year + 1,
+    year2 = year1 + 1
+  ) |> 
+  show_query()
+```
+
+- Now getting into joins here is a simple example below
+
+```{r}
+flights |> 
+  left_join(planes |> rename(year_built = year), by = "tailnum") |> 
+  show_query()
+```
+- There is also `inner_join()`, `right_join()`, `left_join()`, `full_join()`
+
+
+
+## Arrow
+
+```{r}
+library(arrow)
+
+dir.create("data", showWarnings = FALSE)
+
+curl::multi_download(
+  "https://r4ds.s3.us-west-2.amazonaws.com/seattle-library-checkouts.csv",
+  "data/seattle-library-checkouts.csv",
+  resume = TRUE
+)
+```
+it is significatnly faster than csv files
+
+```{r}
+seattle_csv <- open_dataset(
+  sources = "data/seattle-library-checkouts.csv", 
+  col_types = schema(ISBN = string()),
+  format = "csv"
+)
+
+seattle_csv
+```
+
+
+We can see the dimensions of the dataset with `glimpse()`
+
+```{r}
+seattle_csv %>% glimpse()
+```
+
+Here we can see the deferred functions being executed and loaded into the r system. `Collect()` stores the results of the deferred functions.
+
+```{r}
+seattle_csv |> 
+  group_by(CheckoutYear) |> 
+  summarise(Checkouts = sum(Checkouts)) |> 
+  arrange(CheckoutYear) |> 
+  collect()
+```
+
+- Some pros on the parquet files are that they keep the data type of each variables, they also are column by columns, so all information from a column is stored in a single vector.
+
+Rewriting the Seattle library data
+
+```{r}
+
+seattle_csv |>
+  group_by(CheckoutYear) |>
+  write_dataset(path = "data/seattle-library-checkouts",
+                format = "parquet")
+
+```
+
+grouping by year will rewrite it into 18 parquet files based on year
+
+we must reopen the,
+
+```{r}
+seattle_pq <-open_dataset("data/seattle-library-checkouts")
+
+
+query <- seattle_pq |> 
+  filter(CheckoutYear >= 2018, MaterialType == "BOOK") |>
+  group_by(CheckoutYear, CheckoutMonth) |>
+  summarize(TotalCheckouts = sum(Checkouts)) |>
+  arrange(CheckoutYear, CheckoutMonth)
+
+query
+```
+now using `collect()` we will be able to see the results of the query
+
+```{r}
+query %>% collect()
+```
+
+We are also able to check how fast the see how fast the system takes with `system.time()` if we were to test it between parquet method and the csv files the parquet would be abnormally faster by almost 100 times. This is due to the multilevel partitioning of the 18 smaller parquet files 
+
+```{r}
+seattle_csv |> 
+  filter(CheckoutYear == 2021, MaterialType == "BOOK") |>
+  group_by(CheckoutMonth) |>
+  summarize(TotalCheckouts = sum(Checkouts)) |>
+  arrange(desc(CheckoutMonth)) |>
+  collect() |> 
+  system.time()
+
+
+seattle_pq |> 
+  filter(CheckoutYear == 2021, MaterialType == "BOOK") |>
+  group_by(CheckoutMonth) |>
+  summarize(TotalCheckouts = sum(Checkouts)) |>
+  arrange(desc(CheckoutMonth)) |>
+  collect() |> 
+  system.time()
+```
+
+
+## Hierachical data
+
+Lists can hold different types of elemtents
+```{r}
+x1 <- list(1:4, "a", TRUE)
+x1
+```
+
+
+We can often name the components or children of a list by naming the column of a tibble 
+
+```{r}
+x2 <- list(a = 1:2, b = 1:3, c = 1:4)
+x2
+```
+The function struc
+
+
